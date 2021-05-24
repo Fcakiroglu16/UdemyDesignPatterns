@@ -6,7 +6,7 @@ using WebApp.Strategy.Models;
 
 namespace WebApp.Strategy.Repositories
 {
-    interface IProductRepository
+  public  interface IProductRepository
     {
 
         Task<Product> GetById(string id);
