@@ -1,8 +1,25 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    int count = 0;
 }
+@model List<AppUser>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@foreach (var item in Model)
+{
+
+    count++;
+    if (count == 1 || count % 5 == 1)
+    {
+
+        @Html.Raw("<div class='row row-cols-1 row-cols-md-5 g-4'>")
+    }
+
+    <div class="col">
+        <user-card app-user="@item"></user-card>
+    </div>
+
+    if (count % 5 == 0)
+    {
+        @Html.Raw("</div>")
+    }
+}
