@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace WebApp.Observer.Observer
 {
-    internal interface IUserObserver
+    public interface IUserObserver
     {
-        void CreateUser(AppUser appUser);
+        void UserCreated(AppUser appUser);
     }
 }
