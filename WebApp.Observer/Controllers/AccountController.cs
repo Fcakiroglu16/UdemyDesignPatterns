@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApp.Observer.Models;
+using WebApp.Observer.Observer;
 
 namespace BaseProject.Controllers
 {
@@ -13,11 +14,13 @@ namespace BaseProject.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserObserverSubject _userObserverSubject;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, UserObserverSubject userObserverSubject)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _userObserverSubject = userObserverSubject;
         }
 
         public IActionResult Login()
@@ -64,7 +67,7 @@ namespace BaseProject.Controllers
 
             if (identityResult.Succeeded)
             {
-                //subject kullanılacak
+                _userObserverSubject.NotifyObservers(appUser);
 
                 ViewBag.message = "Üyelik işlemi başarıyla gerçekleşti.";
             }

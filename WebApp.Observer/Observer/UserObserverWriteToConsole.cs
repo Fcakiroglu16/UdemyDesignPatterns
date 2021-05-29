@@ -22,8 +22,6 @@ namespace WebApp.Observer.Observer
             var logger = _serviceProvider.GetRequiredService<ILogger<UserObserverWriteToConsole>>();
 
             logger.LogInformation($"user created : Id= {appUser.Id}");
-
-            throw new NotImplementedException();
         }
     }
 }
