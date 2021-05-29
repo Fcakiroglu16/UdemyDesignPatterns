@@ -1,4 +1,5 @@
 using BaseProject.Models;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using WebApp.Observer.Observer;
 
@@ -37,6 +39,8 @@ namespace BaseProject
 
                 return userObserverSubject;
             });
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddDbContext<AppIdentityDbContext>(options =>
             {

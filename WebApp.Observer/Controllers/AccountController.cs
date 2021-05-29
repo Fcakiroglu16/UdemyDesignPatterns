@@ -1,10 +1,12 @@
 ﻿using BaseProject.Models;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApp.Observer.Events;
 using WebApp.Observer.Models;
 using WebApp.Observer.Observer;
 
@@ -15,12 +17,14 @@ namespace BaseProject.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserObserverSubject _userObserverSubject;
+        private readonly IMediator _mediator;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, UserObserverSubject userObserverSubject)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, UserObserverSubject userObserverSubject, IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userObserverSubject = userObserverSubject;
+            _mediator = mediator;
         }
 
         public IActionResult Login()
@@ -67,7 +71,8 @@ namespace BaseProject.Controllers
 
             if (identityResult.Succeeded)
             {
-                _userObserverSubject.NotifyObservers(appUser);
+                await _mediator.Publish(new UserCreatedEvent() { AppUser = appUser });
+                //  _userObserverSubject.NotifyObservers(appUser);
 
                 ViewBag.message = "Üyelik işlemi başarıyla gerçekleşti.";
             }
