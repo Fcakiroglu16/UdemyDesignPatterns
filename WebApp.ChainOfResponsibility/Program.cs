@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApp.ChainOfResponsibility.Models;
 
 namespace BaseProject
 {
@@ -17,21 +18,17 @@ namespace BaseProject
     {
         public static void Main(string[] args)
         {
-           var host = CreateHostBuilder(args).Build();
-
+            var host = CreateHostBuilder(args).Build();
 
             using var scope = host.Services.CreateScope();
 
-
             var identityDbContext = scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>();
-
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
             identityDbContext.Database.Migrate();
 
-
-            if(!userManager.Users.Any())
+            if (!userManager.Users.Any())
             {
                 userManager.CreateAsync(new AppUser() { UserName = "user1", Email = "user1@outlook.com" }, "Password12*").Wait();
 
@@ -41,6 +38,12 @@ namespace BaseProject
                 userManager.CreateAsync(new AppUser() { UserName = "user5", Email = "user5@outlook.com" }, "Password12*").Wait();
             }
 
+            Enumerable.Range(1, 20).ToList().ForEach(x =>
+            {
+                identityDbContext.Products.Add(new Product { Name = $"kalem {x}", Price = 100, Stock = 200 });
+            });
+
+            identityDbContext.SaveChanges();
 
             host.Run();
         }
