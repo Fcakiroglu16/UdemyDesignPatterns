@@ -11,7 +11,7 @@ namespace WebApp.Composite.Models
         public string Name { get; set; }
 
         public string UserId { get; set; }
-        public ICollection<Book> Books;
+        public ICollection<Book> Books { get; set; }
 
         public int ReferenceId { get; set; }
     }

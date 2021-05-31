@@ -1,4 +1,5 @@
 ﻿using BaseProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,6 +12,7 @@ using WebApp.Composite.Models;
 
 namespace WebApp.Composite.Controllers
 {
+    [Authorize]
     public class CategoryMenuController : Controller
     {
         private readonly AppIdentityDbContext _context;
@@ -30,7 +32,19 @@ namespace WebApp.Composite.Controllers
 
             var menu = GetMenus(categories, new Category { Name = "TopCategory", Id = 0 }, new BookComposite(0, "TopMenu"));
 
+            ViewBag.menu = menu;
+
+            ViewBag.selectList = menu.Components.SelectMany(x => ((BookComposite)x).GetSelectListItems(""));
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Index(int categoryId, string bookName)
+        {
+            await _context.Books.AddAsync(new Book { CategoryId = categoryId, Name = bookName });
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         public BookComposite GetMenus(List<Category> categories, Category topCategory, BookComposite topBookComposite, BookComposite last = null)
