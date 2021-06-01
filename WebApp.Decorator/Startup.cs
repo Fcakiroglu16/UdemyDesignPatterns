@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,16 +31,24 @@ namespace BaseProject
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
-            services.AddScoped<IProductRepository>(sp =>
-            {
-                var context = sp.GetRequiredService<AppIdentityDbContext>();
-                var memoryCache = sp.GetRequiredService<IMemoryCache>();
-                var productRepository = new ProductRepository(context);
 
-                var cacheDecorator = new ProductRepositoryCacheDecorator(productRepository, memoryCache);
+            //2. yol
+            services.AddScoped<IProductRepository, ProductRepository>().Decorate<IProductRepository, ProductRepositoryCacheDecorator>().Decorate<IProductRepository, ProductRepositoryLoggingDecorator>();
 
-                return cacheDecorator;
-            });
+            //1. yol
+            //services.AddScoped<IProductRepository>(sp =>
+            //{
+            //    var context = sp.GetRequiredService<AppIdentityDbContext>();
+            //    var memoryCache = sp.GetRequiredService<IMemoryCache>();
+            //    var productRepository = new ProductRepository(context);
+            //    var logService = sp.GetRequiredService<ILogger<ProductRepositoryLoggingDecorator>>();
+
+            //    var cacheDecorator = new ProductRepositoryCacheDecorator(productRepository, memoryCache);
+
+            //    var logDecorator = new ProductRepositoryLoggingDecorator(cacheDecorator, logService);
+
+            //    return logDecorator;
+            //});
 
             services.AddDbContext<AppIdentityDbContext>(options =>
             {
