@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApp.Decorator.Repositories;
+using WebApp.Decorator.Repositories.Decorator;
 
 namespace BaseProject
 {
@@ -27,7 +29,18 @@ namespace BaseProject
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddMemoryCache();
+            services.AddScoped<IProductRepository>(sp =>
+            {
+                var context = sp.GetRequiredService<AppIdentityDbContext>();
+                var memoryCache = sp.GetRequiredService<IMemoryCache>();
+                var productRepository = new ProductRepository(context);
+
+                var cacheDecorator = new ProductRepositoryCacheDecorator(productRepository, memoryCache);
+
+                return cacheDecorator;
+            });
+
             services.AddDbContext<AppIdentityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
