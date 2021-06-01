@@ -1,6 +1,7 @@
 using BaseProject.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,9 +32,9 @@ namespace BaseProject
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
-
+            services.AddHttpContextAccessor();
             //2. yol
-            services.AddScoped<IProductRepository, ProductRepository>().Decorate<IProductRepository, ProductRepositoryCacheDecorator>().Decorate<IProductRepository, ProductRepositoryLoggingDecorator>();
+            //services.AddScoped<IProductRepository, ProductRepository>().Decorate<IProductRepository, ProductRepositoryCacheDecorator>().Decorate<IProductRepository, ProductRepositoryLoggingDecorator>();
 
             //1. yol
             //services.AddScoped<IProductRepository>(sp =>
@@ -49,6 +50,28 @@ namespace BaseProject
 
             //    return logDecorator;
             //});
+
+            //3. yol (Runtime)
+
+            services.AddScoped<IProductRepository>(sp =>
+            {
+                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+
+                var context = sp.GetRequiredService<AppIdentityDbContext>();
+                var memoryCache = sp.GetRequiredService<IMemoryCache>();
+                var productRepository = new ProductRepository(context);
+                var logService = sp.GetRequiredService<ILogger<ProductRepositoryLoggingDecorator>>();
+
+                if (httpContextAccessor.HttpContext.User.Identity.Name == "user1")
+                {
+                    var cacheDecorator = new ProductRepositoryCacheDecorator(productRepository, memoryCache);
+                    return cacheDecorator;
+                }
+
+                var logDecorator = new ProductRepositoryLoggingDecorator(productRepository, logService);
+
+                return logDecorator;
+            });
 
             services.AddDbContext<AppIdentityDbContext>(options =>
             {
